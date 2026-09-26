@@ -1,0 +1,6 @@
+counts,delta,affected,phoneme_level,writer_level
+matched,0.0,0,0.0575,0.0475
+matched,0.3,5,0.54,1.0
+matched,0.5,5,0.5925,1.0
+matched,0.3,10,1.0,1.0
+unmatched,0.0,0,0.045,0.985
