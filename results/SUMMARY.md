@@ -124,3 +124,32 @@ seed `20260926` · toolkit 0.1.0 · numpy 2.4.6 · scipy 1.17.1 · python 3.11.1
 | margin | phonemes | p_declare_equivalence |
 |---|---|---|
 | 0.050 | 10 | 0.964 |
+
+## sens_chisquare_by_homogeneity
+
+| alpha | tokens_per_writer | pooled_tokens | chisq_type1 |
+|---|---|---|---|
+| 5 | 15 | 1500 | 0.634 |
+| 5 | 40 | 4000 | 0.920 |
+| 15 | 15 | 1500 | 0.302 |
+| 15 | 40 | 4000 | 0.636 |
+| 40 | 15 | 1500 | 0.154 |
+| 40 | 40 | 4000 | 0.334 |
+| 100 | 15 | 1500 | 0.102 |
+| 100 | 40 | 4000 | 0.164 |
+
+## sens_zero_share_by_delta
+
+| delta | diff_with_zero | diff_without_zero | share_lost |
+|---|---|---|---|
+| 0.000 | 0.061 | -0.000 | 1.001 |
+| 0.300 | 0.175 | 0.133 | 0.240 |
+| 1.000 | 0.320 | 0.300 | 0.062 |
+
+## sens_vowel_control_by_slots
+
+| slots_per_writer | power |
+|---|---|
+| 15 | 0.566 |
+| 30 | 0.886 |
+| 60 | 0.992 |

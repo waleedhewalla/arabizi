@@ -239,10 +239,10 @@ def pooled_chisquare_type1(rng, reps=500):
             {"test": f"pooled chi-square ({tokens} tokens, one phoneme)", "type1": rej_chi / reps}]
 
 
-def vowel_control_power(rng, reps=500, writers=50, slots=60):
+def vowel_control_power(rng, reps=500, writers=50, slots=60, diffs=(0.02, 0.04, 0.06, 0.08, 0.12)):
     """Paired writer-level test of explicitness in deletable vs non-deletable slots."""
     rows = []
-    for diff in (0.02, 0.04, 0.06, 0.08, 0.12):
+    for diff in diffs:
         rej = 0
         for _ in range(reps):
             base = rng.beta(18, 3, writers)             # writer rates around 0.86
@@ -313,6 +313,50 @@ def tost_power(rng, reps=500, margin=0.05):
     return [{"margin": margin, "phonemes": 10, "p_declare_equivalence": hits / reps}]
 
 
+
+# ------------------------------------------------ sensitivity of earlier claims
+
+def chisquare_by_homogeneity(rng, reps=500):
+    """How the Type I error of pooled-token chi-square depends on writer heterogeneity and volume."""
+    rows = []
+    for alpha in (5, 15, 40, 100):
+        for n in (15, 40):
+            d = Design(alpha=alpha, nat_tokens=n, eli_tokens=n, delta=0.0, zero_eli=0.06, affected=())
+            rej = 0
+            for _ in range(reps):
+                a = draw_corpus(d, rng, "nat")[5].sum(axis=0)
+                b = draw_corpus(d, rng, "eli")[5].sum(axis=0)
+                keep = (a + b) > 0
+                rej += chi2_contingency(np.vstack([a[keep], b[keep]]))[1] < 0.05
+            rows.append({"alpha": alpha, "tokens_per_writer": n, "pooled_tokens": 2 * d.writers * n,
+                         "chisq_type1": rej / reps})
+    return rows
+
+
+def zero_share_by_delta(rng, reps=300):
+    """Share of the natural-elicited difference carried by the zero representation, by delta."""
+    rows = []
+    for delta in (0.0, 0.3, 1.0):
+        d = Design(delta=delta, affected=tuple(range(10)))
+        w, wo = [], []
+        for _ in range(reps):
+            nat, eli = draw_corpus(d, rng, "nat"), draw_corpus(d, rng, "eli")
+            a, b = phoneme_entropies(nat, eli)
+            c, e = phoneme_entropies(nat, eli, drop_zero=True)
+            w.append((a - b).mean()); wo.append((c - e).mean())
+        dw, dwo = float(np.mean(w)), float(np.mean(wo))
+        rows.append({"delta": delta, "diff_with_zero": dw, "diff_without_zero": dwo,
+                     "share_lost": (dw - dwo) / dw if dw else float("nan")})
+    return rows
+
+
+def vowel_control_by_slots(rng, reps=500, diff=0.04):
+    rows = []
+    for slots in (15, 30, 60):
+        rows.append({"slots_per_writer": slots,
+                     "power": vowel_control_power(rng, reps, slots=slots, diffs=(diff,))[0]["power"]})
+    return rows
+
 SCENARIOS = {
     "t14_type1_by_phonemes": type1_by_phonemes,
     "t15_power_by_affected": power_by_affected,
@@ -327,4 +371,7 @@ SCENARIOS = {
     "new_size_imbalance": size_imbalance_type1,
     "new_writer_level": writer_vs_phoneme_level,
     "new_tost": tost_power,
+    "sens_chisquare_by_homogeneity": chisquare_by_homogeneity,
+    "sens_zero_share_by_delta": zero_share_by_delta,
+    "sens_vowel_control_by_slots": vowel_control_by_slots,
 }
